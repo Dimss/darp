@@ -61,7 +61,6 @@ func ValidateWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sendAdmissionValidationResponse(w, upstreamResponse.IsAllowed, upstreamResponse.Message)
-
 }
 
 func LivenessHandler(w http.ResponseWriter, r *http.Request) {
