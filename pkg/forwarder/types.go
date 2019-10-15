@@ -7,6 +7,6 @@ type Upstream struct {
 }
 
 type UpstreamResponse struct {
-	IsAllowed bool   `json:"isAllowed"`
-	Message   string `json:"message"`
+	IsAllowed bool   `json:"isAllowed" validate:"required"`
+	Message   string `json:"message" validate:"required"`
 }

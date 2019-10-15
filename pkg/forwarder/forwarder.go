@@ -8,8 +8,15 @@ import (
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
+	"gopkg.in/go-playground/validator.v8"
 )
 
+var validate *validator.Validate
+
+func init() {
+	config := &validator.Config{TagName: "validate"}
+	validate = validator.New(config)
+}
 func SearchUpstream(resource string) *Upstream {
 	var upstreams []Upstream
 	if err := viper.UnmarshalKey("upstreams", &upstreams); err != nil {
@@ -42,11 +49,17 @@ func (u Upstream) ForwardValidationRequest() (*UpstreamResponse, error) {
 		return nil, fmt.Errorf("failed execute POST request for url: %s", u.Url)
 	}
 	bodyText, err := ioutil.ReadAll(resp.Body)
-	var upstreamResponse *UpstreamResponse
-	if err := json.Unmarshal(bodyText, upstreamResponse); err != nil {
-		logrus.Errorf("Unmarshal upstream response failed: %v", err)
-		return nil, fmt.Errorf("Bad upstream response, url: %v", u.Url)
+	var upstreamResponse UpstreamResponse
+	if err := json.Unmarshal(bodyText, &upstreamResponse); err != nil {
+		logrus.Errorf("Unmarshal upstream response failed, err %v, response body: %s", err, bodyText)
+		return nil, fmt.Errorf("bad upstream response, url: %v", u.Url)
 	}
+
+	if err := validate.Struct(upstreamResponse); err != nil {
+		logrus.Errorf("Invalid response body: %s, %v ", bodyText, err)
+		return nil, fmt.Errorf("bad upstream response, url: %v", u.Url)
+	}
+
 	logrus.Infof("Upstream response: %v", upstreamResponse)
-	return upstreamResponse, nil
+	return &upstreamResponse, nil
 }

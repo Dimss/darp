@@ -11,7 +11,7 @@ import (
 
 var runWebhookServerCmd = &cobra.Command{
 	Use:   "server",
-	Short: "Start HTTP server for serving DAP requests",
+	Short: "Start HTTP server for serving DARP requests",
 	Run: func(cmd *cobra.Command, args []string) {
 		StartHttpRouter()
 	},

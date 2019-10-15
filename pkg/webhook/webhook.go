@@ -66,7 +66,7 @@ func ValidateWebHookHandler(w http.ResponseWriter, r *http.Request) {
 func LivenessHandler(w http.ResponseWriter, r *http.Request) {
 	var upstreams []forwarder.Upstream
 	if err := viper.UnmarshalKey("upstreams", &upstreams); err != nil {
-		logrus.Warn("Broken config, unable  unmarshal upstreams configurations")
+		logrus.Warn("Broken config, unable unmarshal upstreams configurations")
 	}
 	logrus.Info(upstreams)
 	if _, err := w.Write([]byte("OK")); err != nil {
