@@ -1,0 +1,29 @@
+cat <<EOF | cfssl genkey - | cfssljson -bare server
+{
+  "hosts": [
+    "secroute-webhook.elbit.kbit.ocplab.io"
+  ],
+  "CN": "secroute-webhook.elbit.kbit.ocplab.io",
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  }
+}
+EOF
+
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadata:
+  name: secroute.rhte-webhooks-demo
+spec:
+  request: $(cat server.csr | base64 | tr -d '\n')
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+EOF
+
+oc adm certificate approve secroute.rhte-webhooks-demo
+
+kubectl get csr secroute.rhte-webhooks-demo -o jsonpath='{.status.certificate}' | base64 -D > server.crt

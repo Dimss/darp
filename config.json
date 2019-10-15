@@ -1,0 +1,16 @@
+{
+  "http": {
+    "crt": "/Users/dima/.go/src/github.com/darp/test/manually/k8s-certs/server.crt",
+    "key": "/Users/dima/.go/src/github.com/darp/test/manually/k8s-certs/server-key.pem"
+  },
+  "upstreams": [
+    {
+      "url": "http://127.0.0.1:8081/validate/route",
+      "resource": "route"
+    },
+    {
+      "url": "http://127.0.0.1:3000/service",
+      "resource": "services"
+    }
+  ]
+}
