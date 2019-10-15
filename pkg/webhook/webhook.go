@@ -60,7 +60,7 @@ func ValidateWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		sendAdmissionValidationResponse(w, true, "Automatic allow response")
 		return
 	}
-	sendAdmissionValidationResponse(w, upstreamResponse.IsAllowed, upstreamResponse.Message)
+	sendAdmissionValidationResponse(w, *upstreamResponse.IsAllowed, upstreamResponse.Message)
 }
 
 func LivenessHandler(w http.ResponseWriter, r *http.Request) {

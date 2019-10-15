@@ -6,17 +6,17 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gopkg.in/go-playground/validator.v9"
 	"io/ioutil"
 	"net/http"
-	"gopkg.in/go-playground/validator.v8"
 )
 
 var validate *validator.Validate
 
 func init() {
-	config := &validator.Config{TagName: "validate"}
-	validate = validator.New(config)
+	validate = validator.New()
 }
+
 func SearchUpstream(resource string) *Upstream {
 	var upstreams []Upstream
 	if err := viper.UnmarshalKey("upstreams", &upstreams); err != nil {
@@ -50,6 +50,7 @@ func (u Upstream) ForwardValidationRequest() (*UpstreamResponse, error) {
 	}
 	bodyText, err := ioutil.ReadAll(resp.Body)
 	var upstreamResponse UpstreamResponse
+
 	if err := json.Unmarshal(bodyText, &upstreamResponse); err != nil {
 		logrus.Errorf("Unmarshal upstream response failed, err %v, response body: %s", err, bodyText)
 		return nil, fmt.Errorf("bad upstream response, url: %v", u.Url)
