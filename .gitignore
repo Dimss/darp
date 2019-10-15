@@ -1,4 +1,4 @@
 .idea/
-test/manually/server.crt
-test/manually/server.csr
-test/manually/server-key.pem
+test/manually/k8s-certs/server-key.pem
+test/manually/k8s-certs/server.crt
+test/manually/k8s-certs/server.csr
