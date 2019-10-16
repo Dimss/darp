@@ -2,3 +2,4 @@
 test/manually/k8s-certs/server-key.pem
 test/manually/k8s-certs/server.crt
 test/manually/k8s-certs/server.csr
+test/darp_client/node_modules/
