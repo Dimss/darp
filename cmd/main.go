@@ -19,6 +19,10 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	// Setup commands
 	rootCmd.AddCommand(runWebhookServerCmd)
+	rootCmd.PersistentFlags().StringP("configpath", "c", "", "Path to config directory with config.json file, default to . ")
+	if err := viper.BindPFlag("configpath", rootCmd.PersistentFlags().Lookup("configpath")); err != nil {
+		panic(err)
+	}
 	// Init log
 	logrus.SetOutput(os.Stdout)
 	logrus.SetReportCaller(true)
@@ -31,6 +35,12 @@ func initConfig() {
 	viper.SetEnvPrefix("DARP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
+	configPath := viper.GetString("configpath")
+	logrus.Infof("Configuration directory %v: ", configPath)
+	// If config flag is empty, assume config.json located in current directory
+	if configPath != "" {
+		viper.AddConfigPath(configPath)
+	}
 	viper.WatchConfig()
 	err := viper.ReadInConfig()
 	if err != nil {
