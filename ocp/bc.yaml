@@ -30,11 +30,11 @@ objects:
 parameters:
 - description: Specify current namespace
   name: NAMESPACE
-  value: "uac"
+  value: "darp"
   required: true
 - description: Specify service GIT url
   name: GIT_URL
-  value: "https://github.com/Dimss/uac.git"
+  value: "https://github.com/Dimss/darp.git"
   required: true
 - description: Specify version
   name: VERSION
