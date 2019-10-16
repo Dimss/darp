@@ -1,7 +1,8 @@
 #!/bin/ash
 mv /tmp/src /go/src/darp
 export GO111MODULE=on
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod vendor -o /go/bin/darp cmd/server.go cmd/main.go
+pwd
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/darp -mod vendor cmd/server.go cmd/main.go
 
 #cp /go/src/uac/config.tmpl /go/bin/config.json
 #rm -fr /go/src/uac
