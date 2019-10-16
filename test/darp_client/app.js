@@ -7,7 +7,7 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use('/', router);
 
-router.route('/service').post((req, resp, next) => {
+router.route('/service').post((req, resp) => {
     console.log(JSON.stringify(req.body, null, 4));
     let adRequest = req.body;
     if (adRequest.request.object.metadata.labels.type === "good-service") {
