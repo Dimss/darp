@@ -1,4 +1,5 @@
 #!/bin/ash
+set -x
 mv /tmp/src /go/src/darp
 cd /go/src/darp
 export GO111MODULE=on
