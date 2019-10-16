@@ -4,6 +4,6 @@ cd /go/src/darp
 export GO111MODULE=on
 echo "Building sources..."
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/darp -mod vendor cmd/server.go cmd/main.go
-ls /go/bin
-#rm -fr /go/src/uac
+rm -fr /go/src/darp
+ls -all /go/bin
 #chmod +x /go/bin/uac
