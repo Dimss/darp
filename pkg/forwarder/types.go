@@ -16,8 +16,3 @@ type Upstream struct {
 	Resource string `json:"resource"`
 }
 
-//type ValidationRequest struct {
-//	Upstreams []Upstream `json:"upstreams"`
-//	Resource  string     `json:"resource"`
-//	Body      *[]byte    `json:"body"`
-//}

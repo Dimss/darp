@@ -33,14 +33,16 @@ func SearchForUpstream(k8sResource string, body *[]byte) ([]UpstreamRequest, err
 	return upstreamRequests, nil
 }
 
-func ForwardValidationRequest(doneChan chan UpstreamResponse, upstreamsRequests *[]UpstreamRequest) error {
+func ForwardValidationRequests(doneChan chan UpstreamResponse, upstreamsRequests *[]UpstreamRequest) {
 	// Upstream Responses slice
 	var upstreamResponses []UpstreamResponse
 	// Channel for upstream responses results
 	urChan := make(chan UpstreamResponse)
+	// Upstream response channel open flag
+	urChanOpen := true
 	// Run and execute all upstream request in parallel
 	for _, ur := range *upstreamsRequests {
-		go ur.execUpstreamRequest(urChan, doneChan)
+		go ur.execUpstreamRequest(urChan, &urChanOpen)
 	}
 	// Wait for all request to be finished
 	for upstreamRes := range urChan {
@@ -48,23 +50,24 @@ func ForwardValidationRequest(doneChan chan UpstreamResponse, upstreamsRequests 
 		// Stop the execution, send not allowed response to K8S
 		// And break the chanel read loop
 		if *upstreamRes.IsAllowed == false {
-			doneChan <- upstreamRes
+			doneChan <- upstreamRes // Send admission response to K8S
+			urChanOpen = false      // Close the upstream results channel
 			break
 		}
 		// All good, append result for further logging
 		upstreamResponses = append(upstreamResponses, upstreamRes)
 		if len(upstreamResponses) == len(*upstreamsRequests) {
+			doneChan <- upstreamRes // Send admission response to K8S
 			break // All good, all requests has been finished, break the loop
 		}
 	}
-	logrus.Infof("Send to chan is done, waiting to close channel")
+	logrus.Infof("Upstream request triggered, waiting for all request finish")
 	defer close(urChan)
-	return nil
 }
 
-func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, doneChan chan UpstreamResponse) {
+func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, urChanOpen *bool) {
 	var uRes UpstreamResponse
-	// As for now, the default behaviour on failure is allow
+	// As for now, the default behaviour on system (not upstream response) failure is allow
 	isAllowed := true
 	logrus.Infof("Forwarding to upstream url: %v, resource: %v", ur.Upstream.Url, ur.Upstream.Resource)
 	client := &http.Client{}
@@ -72,7 +75,7 @@ func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, done
 	if err != nil {
 		logrus.Errorf("%v", err)
 		// Failed to create new HTTP request, send failure response to channel
-		doneChan <- UpstreamResponse{
+		urChan <- UpstreamResponse{
 			IsAllowed:   &isAllowed,
 			Message:     fmt.Sprintf("%v", err),
 			UpstreamUrl: ur.Upstream.Url}
@@ -84,7 +87,7 @@ func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, done
 	if err != nil {
 		// Failed execute HTTP request, send failure response to channel
 		logrus.Errorf("failed execute request POST request, err: %v", err)
-		doneChan <- UpstreamResponse{
+		urChan <- UpstreamResponse{
 			IsAllowed:   &isAllowed,
 			Message:     fmt.Sprintf("%v", err),
 			UpstreamUrl: ur.Upstream.Url}
@@ -94,7 +97,7 @@ func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, done
 	if err := json.Unmarshal(bodyText, &uRes); err != nil {
 		// Failed unmarshal HTTP response, send failure response to channel
 		logrus.Errorf("Unmarshal upstream response failed, err %v, response body: %s", err, bodyText)
-		doneChan <- UpstreamResponse{
+		urChan <- UpstreamResponse{
 			IsAllowed:   &isAllowed,
 			Message:     fmt.Sprintf("%v", err),
 			UpstreamUrl: ur.Upstream.Url}
@@ -103,7 +106,7 @@ func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, done
 	if err := validate.Struct(uRes); err != nil {
 		// Failed to validate HTTP response, send failure response to channel
 		logrus.Errorf("Invalid response body: %s, %v ", bodyText, err)
-		doneChan <- UpstreamResponse{
+		urChan <- UpstreamResponse{
 			IsAllowed:   &isAllowed,
 			Message:     fmt.Sprintf("%v", err),
 			UpstreamUrl: ur.Upstream.Url}
@@ -113,5 +116,9 @@ func (ur UpstreamRequest) execUpstreamRequest(urChan chan UpstreamResponse, done
 	logrus.Infof("Upstream response: [IsAllowed: %v, Message: %s, Url: %s]",
 		*uRes.IsAllowed, uRes.Message, uRes.UpstreamUrl)
 	// All good, return original upstream response
-	urChan <- uRes
+	logrus.Infof("Is Upstream response results channel open: %v", *urChanOpen)
+	if *urChanOpen == true {
+		urChan <- uRes
+	}
+
 }

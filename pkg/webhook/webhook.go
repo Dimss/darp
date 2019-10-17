@@ -46,11 +46,6 @@ func ValidateWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		sendAdmissionValidationResponse(w, false, "error during deserializing request body")
 		return
 	}
-	//reqDone := make(chan bool)
-	//reqDone <- true
-	//<-reqDone
-	// Init validate request
-
 	// Search for upstreams
 	upstreamRequests, err := forwarder.SearchForUpstream(ar.Request.Resource.Resource, &body)
 	if err != nil {
@@ -65,15 +60,14 @@ func ValidateWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logrus.Infof("Upstreams was found for resource: %v, proxying request", ar.Request.Resource.Resource)
-	if err := forwarder.ForwardValidationRequest(r.Context().Value("doneChan").(chan forwarder.UpstreamResponse), &upstreamRequests); err != nil {
-		logrus.Warnf("Error during forwarding requests: %v", err)
-		sendAdmissionValidationResponse(w, true, "Automatic allow response")
-		return
-	}
-
-	doneChan := r.Context().Value("doneChan").(chan bool)
-	<-doneChan
-	sendAdmissionValidationResponse(w, true, "")
+	// Get doneChan from request context
+	doneChan := r.Context().Value("doneChan").(chan forwarder.UpstreamResponse)
+	// Start request execution
+	go forwarder.ForwardValidationRequests(doneChan, &upstreamRequests)
+	// Wait for any results
+	ur := <-doneChan
+	// Send the validation results back to K8S
+	sendAdmissionValidationResponse(w, *ur.IsAllowed, ur.Message)
 }
 
 func LivenessHandler(w http.ResponseWriter, r *http.Request) {

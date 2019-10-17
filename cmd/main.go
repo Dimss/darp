@@ -20,7 +20,6 @@ func init() {
 	// Setup commands
 	rootCmd.AddCommand(runWebhookServerCmd)
 	rootCmd.PersistentFlags().StringP("configpath", "c", "", "Path to config directory with config.json file, default to . ")
-	rootCmd.PersistentFlags().BoolP("killswitch", "-i", true, "Default AdmissionReview IsAllowed value on error, default value true")
 	if err := viper.BindPFlag("configpath", rootCmd.PersistentFlags().Lookup("configpath")); err != nil {
 		panic(err)
 	}
