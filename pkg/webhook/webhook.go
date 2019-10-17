@@ -46,21 +46,34 @@ func ValidateWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		sendAdmissionValidationResponse(w, false, "error during deserializing request body")
 		return
 	}
-	upstream := forwarder.SearchUpstream(ar.Request.Resource.Resource)
-	if upstream == nil {
+	//reqDone := make(chan bool)
+	//reqDone <- true
+	//<-reqDone
+	// Init validate request
+
+	// Search for upstreams
+	upstreamRequests, err := forwarder.SearchForUpstream(ar.Request.Resource.Resource, &body)
+	if err != nil {
+		logrus.Errorf("Error during searching for upstreams, err: %v", err)
+		sendAdmissionValidationResponse(w, true, "Automatic allow response")
+		return
+	}
+	// If no upstreams found, return ok validation response to k8S
+	if len(upstreamRequests) == 0 {
 		logrus.Infof("No upstreams was configured for resource: %v", ar.Request.Resource.Resource)
 		sendAdmissionValidationResponse(w, true, "Automatic allow response")
 		return
 	}
 	logrus.Infof("Upstreams was found for resource: %v, proxying request", ar.Request.Resource.Resource)
-	upstream.Body = body
-	upstreamResponse, err := upstream.ForwardValidationRequest()
-	if err != nil {
-		logrus.Errorf("Error during validating forwarding request: %v", err)
+	if err := forwarder.ForwardValidationRequest(r.Context().Value("doneChan").(chan forwarder.UpstreamResponse), &upstreamRequests); err != nil {
+		logrus.Warnf("Error during forwarding requests: %v", err)
 		sendAdmissionValidationResponse(w, true, "Automatic allow response")
 		return
 	}
-	sendAdmissionValidationResponse(w, *upstreamResponse.IsAllowed, upstreamResponse.Message)
+
+	doneChan := r.Context().Value("doneChan").(chan bool)
+	<-doneChan
+	sendAdmissionValidationResponse(w, true, "")
 }
 
 func LivenessHandler(w http.ResponseWriter, r *http.Request) {

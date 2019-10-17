@@ -9,7 +9,11 @@
       "resource": "route"
     },
     {
-      "url": "http://127.0.0.1:3000/service",
+      "url": "http://127.0.0.1:3000/service/check-labels",
+      "resource": "services"
+    },
+    {
+      "url": "http://127.0.0.1:3000/service/check-ports",
       "resource": "services"
     }
   ]

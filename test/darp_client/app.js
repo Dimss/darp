@@ -17,4 +17,12 @@ router.route('/service').post((req, resp) => {
     }
 });
 
+router.route('/service/check-labels').post((req, resp) => {
+    resp.send({'isAllowed': false, 'message': 'broken'});
+});
+
+router.route('/service/check-ports').post((req, resp) => {
+    resp.send({'isAllowed': true, 'message': 'all good'});
+});
+
 app.listen(port, () => console.log(`listening on port ${port}!`));
