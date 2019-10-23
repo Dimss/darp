@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: darp-service
+spec:
+  clusterIP: None
+  ports:
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 8080
+    nodePort: 0
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: darp-service
+subsets:
+- addresses:
+  - ip: 199.203.111.224
+  ports:
+  - name: https
+    port: 8080

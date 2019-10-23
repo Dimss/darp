@@ -20,11 +20,11 @@ objects:
       sourceStrategy:
         from:
           kind: "DockerImage"
-          name: "docker.io/dimssss/golang-s2i:0.4"
+          name: "docker.io/dimssss/golang-s2i:0.5"
     output:
       to:
         kind: "DockerImage"
-        name: "docker.io/dimssss/darp:v0.1"
+        name: "docker.io/dimssss/darp:${VERSION}"
       pushSecret:
         name: docker-hub-dimssss
 parameters:
