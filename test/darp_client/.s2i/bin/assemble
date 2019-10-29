@@ -2,4 +2,4 @@ ls -all /tmp/src
 cp -r /tmp/src /opt/app-root
 ls -all /opt/app-root/src
 cd /opt/app-root/src
-npm install –save
+/opt/rh/rh-nodejs8/root/usr/bin/npm install –save

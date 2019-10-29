@@ -16,16 +16,14 @@ objects:
     source:
       git:
         uri: ${GIT_URL}
-      sourceSecret:
-        name: darp-git-secret
       contextDir: test/darp_client
     strategy:
       sourceStrategy:
         from:
           kind: "DockerImage"
-          name: "docker-base-ocp.artifactory.resource.bank/rhscl/nodejs-8-rhel7:latest"
+          name: "registry.access.redhat.com/rhscl/nodejs-8-rhel7"
         env:
-       - name: GIT_SSL_NO_VERIFY
+        - name: GIT_SSL_NO_VERIFY
           value: "true"
     output:
       to:
