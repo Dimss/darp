@@ -1,0 +1,22 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: create.route.for.okto
+webhooks:
+  - name: create.route.for.okto
+    namespaceSelector:
+      matchLabels:
+        darp: enabled
+    clientConfig:
+      caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJ1ekNDQVNTZ0F3SUJBZ0lDQitNd0RRWUpLb1pJaHZjTkFRRUxCUUF3QURBZ0Z3MHhPVEV3TWprd09UUTIKTXpSYUdBOHlNVEU1TVRBeU9UQTVORFl6TkZvd0FEQ0JuekFOQmdrcWhraUc5dzBCQVFFRkFBT0JqUUF3Z1lrQwpnWUVBdzNoT1RZTkxwckw4anU3Yjd6eG9wR2Z1Vkd0SHZvdGpKZW5wT0ltWlZjQnIxN2liL2Vqb0FSUEVTKzZTCktUQTV4cUdkUnByTWVtTTVPYTk1dUJzMGhoNlgrN2ZuUnlZVTBGVm5DVU9sdk1WcmE2djNGV2dLMEtkaW5nYlEKRU1aM2VPWklOc20vczhvSFJWVWFRRUNFZm5Za0JLeUFmVWJ4TGRWSUQxS0gxZ2NDQXdFQUFhTkNNRUF3RGdZRApWUjBQQVFIL0JBUURBZ0tFTUIwR0ExVWRKUVFXTUJRR0NDc0dBUVVGQndNQ0JnZ3JCZ0VGQlFjREFUQVBCZ05WCkhSTUJBZjhFQlRBREFRSC9NQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0R0JBSGc4enBVVUR1SEtrb0MzRElVR1RSRlQKQ0ZLQm91UmhFbndpOG5zdDc5bFNjRklINHNhNi82OXRXZENmRUplQ0hMUmczanFZM2wxdFc3NUVyc25GYWpScApBSEV4N01iMEp5b25tcEdEZW9lOTNWY0FUK281ekJQZnc5Y1hGWUJFeG9oc0ZEWnJXN2JsTGZuVTEwRTUwK0RyClpiTGZqUzkyQ3JoUXhtanAxVUI5Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+      service:
+        namespace: "darp"
+        name: "darp-service"
+        path: "/validate"
+    rules:
+    - operations: ["CREATE"]
+      apiGroups: ["*"]
+      apiVersions: ["*"]
+      resources: ["services"]
+      scope: "*"
+    failurePolicy: Ignore

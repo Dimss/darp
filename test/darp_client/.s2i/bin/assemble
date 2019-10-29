@@ -1,0 +1,5 @@
+ls -all /tmp/src
+cp -r /tmp/src /opt/app-root
+ls -all /opt/app-root/src
+cd /opt/app-root/src
+npm install –save
