@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: darp-client
+  labels:
+    app: darp-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: darp-client
+  template:
+    metadata:
+      labels:
+        app: darp-client
+    spec:
+      containers:
+      - name: darp-client
+        image: docker.io/dimssss/darp-client:0.1
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: darp-client
+spec:
+  selector:
+    app: darp-client
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
